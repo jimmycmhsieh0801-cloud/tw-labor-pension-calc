@@ -26,6 +26,23 @@ if (typeof document !== "undefined") {
     document.getElementById("retireTotalEl").textContent = `約 ${(res.retireTotal / 10000).toFixed(1)} 萬元`;
   }
   ids.forEach(id => document.getElementById(id).addEventListener("input", render));
+  const copyBtn = document.getElementById("copyResultBtn");
+  if (copyBtn) {
+    copyBtn.addEventListener("click", () => {
+      const [s, sp, tr, y] = ids.map(id => document.getElementById(id).value);
+      const res = calcLaborPension(s, sp, tr, y);
+      const summary = `【2026 勞退自提 ${sp}% 節稅試算】\n月薪級距：NT$${res.cappedSalary.toLocaleString()}｜邊際稅率 ${tr}%\n每月自提：NT$${res.monthlySelf.toLocaleString()}｜每年立即省稅：NT$${res.annualTaxSaved.toLocaleString()}\n${y}年後預估累積（4%）：約 ${(res.retireTotal / 10000).toFixed(1)} 萬元\n👉 免費試算：https://jimmycmhsieh0801-cloud.github.io/tw-labor-pension-calc/`;
+      const done = () => {
+        copyBtn.textContent = "✓ 已複製試算摘要，快去貼上分享！";
+        setTimeout(() => { copyBtn.textContent = "📋 一鍵複製試算結果分享（貼到 Line 群 / Threads 討論）"; }, 2200);
+        if (typeof gtag === "function") gtag("event", "share_result_copy", { tool: "tw-labor-pension-calc" });
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(summary).then(done).catch(() => {});
+      }
+    });
+  }
+
   render();
 }
 if (typeof module !== "undefined" && module.exports) module.exports = { calcLaborPension };
